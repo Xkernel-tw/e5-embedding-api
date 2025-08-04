@@ -9,11 +9,6 @@ services:
     ports:
       - "11543:7860"
     environment:
-      - RUST_BACKTRACE=full
-      - OPENBLAS_NUM_THREADS=1
-      - OMP_NUM_THREADS=1
-      - MKL_NUM_THREADS=1
-      - NUMEXPR_NUM_THREADS=1
       - MODEL_CACHE_DIR=/model_cache
       - NVIDIA_VISIBLE_DEVICES=all
     volumes:
