@@ -6,7 +6,8 @@ WORKDIR /app
 
 # 複製 requirements.txt 並安裝 Python 依賴
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --progress-bar off -r requirements.txt
 
 # 複製應用程式碼到容器內
 COPY . .
