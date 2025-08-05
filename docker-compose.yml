@@ -7,19 +7,19 @@ services:
       dockerfile: Dockerfile
     image: embedding
     ports:
-      - "8080:7860"
+      - "11543:7860"
     environment:
       - MODEL_CACHE_DIR=/model_cache
+      - NVIDIA_VISIBLE_DEVICES=all
     volumes:
       - model_cache:/model_cache
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
     dns:
       - 8.8.8.8
+    ulimits:
+      nproc: 32768
+      nofile: 1048576
+    security_opt:
+      - seccomp=unconfined
 
 volumes:
   model_cache:

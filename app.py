@@ -17,6 +17,8 @@ class EmbeddingModel:
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=self.cache_dir)
         self.model = AutoModel.from_pretrained(model_name, cache_dir=self.cache_dir)
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model = AutoModel.from_pretrained(model_name, cache_dir=self.cache_dir).to(self.device)
 
     def _ensure_model_downloaded(self):
         # 預先下載模型
@@ -29,9 +31,10 @@ class EmbeddingModel:
 
     def get_embedding(self, text):
         inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
+        inputs = {k: v.to(self.device) for k, v in inputs.items()}
         with torch.no_grad():
             outputs = self.model(**inputs)
-        return outputs.last_hidden_state.mean(dim=1).squeeze().numpy()
+        return outputs.last_hidden_state.mean(dim=1).squeeze().cpu().numpy()
 
 app = FastAPI()
 embedding_model = EmbeddingModel()
@@ -47,10 +50,11 @@ class EmbeddingResponse(BaseModel):
     usage: dict
 
 @app.post("/v1/embeddings", response_model=EmbeddingResponse)
+@app.post("/embeddings", response_model=EmbeddingResponse)
 async def create_embeddings(request: EmbeddingRequest):
     if not request.input:
         raise HTTPException(status_code=400, detail="Input text cannot be empty")
-    
+
     embeddings = []
     for idx, text in enumerate(request.input):
         embedding_vector = embedding_model.get_embedding(text).tolist()
@@ -59,7 +63,7 @@ async def create_embeddings(request: EmbeddingRequest):
             "embedding": embedding_vector,
             "index": idx
         })
-    
+
     response = EmbeddingResponse(
         data=embeddings,
         model=request.model,
