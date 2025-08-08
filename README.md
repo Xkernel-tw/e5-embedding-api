@@ -86,6 +86,11 @@ To run the service in the background, use the following command:
 docker-compose up -d
 ```
 
+Xkernel API-dev
+```bash
+docker run -d --gpus all --security-opt seccomp=unconfined -it -p 0.0.0.0:11543:7860 xkerneltw/e5-embedding-api_embedding:latest
+```
+
 ### Stopping the Service
 To stop the running service, use:
 
